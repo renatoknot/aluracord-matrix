@@ -194,10 +194,10 @@ export default function PaginaInicial() {
                 marginBottom: "16px",
               }}
               src={
-                //Caso nome do usuario for maior e 2 letras mostras sua foto do GitHub
+                //Caso nome do usuario for maior que 2 letras mostra sua foto do GitHub
                 username.length > 2
                   ? `https://github.com/${username}.png`
-                  : `https://github.com/renatoknot/renatoknot/blob/main/icons-readme/react.png`
+                  : `../img/logo-react.png`
               }
             />
             <Text
@@ -220,7 +220,7 @@ export default function PaginaInicial() {
                 borderRadius: "1000px",
               }}
             >
-              {userData.location}
+              {userData ? userData.location : ""}
             </Text>
           </Box>
           {/* Photo Area */}
