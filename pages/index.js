@@ -1,40 +1,9 @@
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import appConfig from "../config.json";
-
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: "Open Sans", sans-serif;
-      }
-      /* App fit Height */
-      html,
-      body,
-      #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */
-    `}</style>
-  );
-}
 
 function Titulo(props) {
   const Tag = props.tag || "h1";
@@ -67,12 +36,35 @@ function Titulo(props) {
 
 export default function PaginaInicial() {
   // const username = 'omariosouto';
-  const [username, setUsername] = useState("omariosouto");
-  const roteamento = useRouter();
+  const [username, setUsername] = useState("");
+  const router = useRouter();
+
+  // Data from user of github
+  const [userData, setUserData] = useState();
+
+  const githubUrl = `https://api.github.com/users/${username}`;
+
+  const getUserData = async () => {
+    const response = await fetch(githubUrl);
+    const jsonData = await response.json();
+
+    if (jsonData && jsonData.message != "Not Found") {
+      setUserData(jsonData);
+    } else if (username !== "") {
+      console.log("Username does not exist");
+    } else {
+      setUserData({});
+    }
+  };
+
+  //Precisamos buscar os dados do usuário, toda vez que houver uma atualização no nome do usuário,
+  //para isso usamos o hook useEffect do React.
+  useEffect(() => {
+    getUserData();
+  }, [username]);
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: "flex",
@@ -107,11 +99,11 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
-            onSubmit={function (infosDoEvento) {
-              infosDoEvento.preventDefault();
+            onSubmit={function (event) {
+              event.preventDefault();
               console.log("Alguém submeteu o form");
-              roteamento.push("/chat");
-              // window.location.href = '/chat';
+              router.push("/chat");
+              // window.location.href = "/chat";
             }}
             styleSheet={{
               display: "flex",
@@ -196,12 +188,17 @@ export default function PaginaInicial() {
               minHeight: "240px",
             }}
           >
-            <Image
+            <Image // GitHub Pic Profile
               styleSheet={{
                 borderRadius: "50%",
                 marginBottom: "16px",
               }}
-              src={`https://github.com/${username}.png`}
+              src={
+                //Caso nome do usuario for maior e 2 letras mostras sua foto do GitHub
+                username.length > 2
+                  ? `https://github.com/${username}.png`
+                  : `https://github.com/renatoknot/renatoknot/blob/main/icons-readme/react.png`
+              }
             />
             <Text
               variant="body4"
@@ -213,6 +210,17 @@ export default function PaginaInicial() {
               }}
             >
               {username}
+            </Text>
+            <Text
+              variant="body4"
+              styleSheet={{
+                color: appConfig.theme.colors.neutrals[200],
+                backgroundColor: appConfig.theme.colors.neutrals[900],
+                padding: "3px 10px",
+                borderRadius: "1000px",
+              }}
+            >
+              {userData.location}
             </Text>
           </Box>
           {/* Photo Area */}
